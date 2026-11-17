@@ -1,0 +1,8 @@
+/dist/
+/data/
+*.db
+*.db-wal
+*.db-shm
+secret.key
+*.private.key
+/web/node_modules/
