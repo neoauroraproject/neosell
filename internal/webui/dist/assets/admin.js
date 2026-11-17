@@ -595,3 +595,55 @@ route(/^\/admin\/audit$/, async (main) => {
       <div><h3>بعد</h3><pre class="code small pre">${esc(JSON.stringify(x.after ?? null, null, 2))}</pre></div></div>`, { wide: true });
   });
 });
+
+// ---------- system & update ----------
+route(/^\/admin\/system$/, async (main) => {
+  const draw = async (fresh) => {
+    const s = await get(`/api/admin/system${fresh ? '?check=1' : ''}`);
+    const tlsFa = { acme: "Let's Encrypt (خودکار)", self: 'گواهی خودامضا', file: 'گواهی دستی', off: 'بدون TLS (پشت پراکسی)' };
+    const state = s.error ? ['error', 'بررسی ناموفق'] : s.available ? ['pending', 'نسخه‌ی تازه آماده است'] : ['active', 'به‌روز است'];
+    main.innerHTML = `<div class="page-head"><div><h1>به‌روزرسانی و سیستم</h1><p>نسخه‌ی پنل، به‌روزرسانی با یک کلیک و مشخصات سرور.</p></div></div>
+      <div class="split">
+        <section class="card"><div class="card-head"><div class="row"><span class="icon-chip coral">${icon('sparkle', 20)}</span><div><h2>نسخه‌ی پنل</h2>${status(state[0]).replace(/>[^<]*<\/span>$/, `>${state[1]}</span>`)}</div></div>
+          <button class="btn white small" id="recheck">${icon('search', 15)}بررسی دوباره</button></div>
+          <div class="grid two" style="margin-top:6px">
+            <div class="figure"><span>نسخه‌ی فعلی</span><b class="ltr">v${esc(s.version.replace(/^v/, ''))}</b><span class="ltr small">${esc(s.os)}/${esc(s.arch)}</span></div>
+            <div class="figure"><span>آخرین نسخه</span><b class="ltr">${esc(s.latest || '—')}</b><span>${s.published_at ? date(Date.parse(s.published_at) / 1000) : ''}</span></div></div>
+          ${s.error ? `<div class="banner bad" style="margin-top:16px">${esc(s.error)}</div>` : ''}
+          ${s.notes ? `<details class="box" style="margin-top:16px" ${s.available ? 'open' : ''}><summary>تغییرات این نسخه</summary><p class="pre small" style="margin-top:8px">${esc(s.notes)}</p></details>` : ''}
+          <div id="upd" style="margin-top:18px">${s.available && s.can_update
+            ? `<button class="btn coral" id="go">${icon('upload', 16)}به‌روزرسانی به ${esc(s.latest)}</button>
+               <p class="small muted" style="margin-top:8px">فایل تازه با چک‌سام بررسی می‌شود، جایگزین می‌شود و پنل چند ثانیه دوباره راه‌اندازی می‌شود. سرویس‌های مشتری‌ها قطع نمی‌شوند.</p>`
+            : s.available ? '<p class="small muted">فقط مالک پنل می‌تواند به‌روزرسانی کند.</p>' : ''}
+            ${!s.systemd && s.available ? '<p class="small muted">پنل زیر systemd اجرا نمی‌شود؛ بعد از به‌روزرسانی آن را دستی دوباره اجرا کنید.</p>' : ''}</div></section>
+        <aside class="stack">
+          <section class="card"><h2 style="margin-bottom:12px">سرور</h2><dl class="kv">
+            <dt>آدرس پنل</dt><dd class="ltr small">${esc(s.public_url || '—')}</dd>
+            <dt>پورت</dt><dd class="ltr">${esc((s.listen || '').replace(/^:/, ''))}</dd>
+            <dt>دامنه</dt><dd class="ltr">${esc(s.domain || '—')}</dd>
+            <dt>SSL</dt><dd>${esc(tlsFa[s.tls] || s.tls)}</dd></dl></section>
+          <section class="card flat dotted" style="background-color:var(--glass)"><h2 style="font-size:1.1rem;font-weight:500">تغییر پورت یا دامنه</h2>
+            <p class="small ink2" style="margin:6px 0 10px">روی سرور این دستور را بزنید و از منو «Change panel port» یا «Set domain & SSL» را انتخاب کنید:</p>${copyField('neosell')}</section>
+        </aside></div>`;
+    $('#recheck', main).onclick = (e) => busy(e.target, () => draw(true));
+    $('#go', main)?.addEventListener('click', async (e) => {
+      if (!(await confirmBox(`پنل به ${esc(s.latest)} به‌روزرسانی و چند ثانیه دوباره راه‌اندازی شود؟`, 'به‌روزرسانی'))) return;
+      busy(e.target, async () => {
+        const r = await post('/api/admin/system/update');
+        const box = $('#upd', main);
+        box.innerHTML = `<div class="tile" style="display:flex;gap:12px;align-items:center">${icon('sparkle', 20)}<div><b>نسخه‌ی ${esc(r.version)} نصب شد</b><div class="small muted">${r.restarting ? 'در حال راه‌اندازی دوباره…' : 'پنل را دستی دوباره اجرا کنید.'}</div></div></div>`;
+        if (!r.restarting) return;
+        const target = r.version;
+        for (let i = 0; i < 60; i++) {
+          await new Promise((res) => setTimeout(res, 2000));
+          try {
+            const b = await fetch('/api/bootstrap', { credentials: 'same-origin' }).then((x) => x.json());
+            if (b.version === target || b.version === 'v' + target) { toast('به‌روزرسانی انجام شد'); location.reload(); return; }
+          } catch { /* still restarting */ }
+        }
+        toast('پنل هنوز بالا نیامده؛ چند لحظه بعد صفحه را تازه کنید', true);
+      });
+    });
+  };
+  await draw(false);
+});

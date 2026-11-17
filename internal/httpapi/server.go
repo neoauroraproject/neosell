@@ -117,6 +117,7 @@ func (s *Server) Handler() http.Handler {
 	if s.Services != nil {
 		s.registerServices(mux)
 	}
+	s.registerSystem(mux)
 
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) { writeErr(w, 404, "مسیر پیدا نشد") })
 	mux.Handle("/", s.spa())

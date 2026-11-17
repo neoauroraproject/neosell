@@ -1,7 +1,9 @@
 // Command neosell is the whole Neo Sell product in one binary:
 //
 //	neosell [serve]              run the panel (default)
+//	neosell                      interactive menu (in a terminal)
 //	neosell install              write config + systemd unit and start the service
+//	neosell update               install the latest verified release
 //	neosell agent join|run       Neo Agent on a tunnel server
 //	neosell admin reset-password <email> <new-password>
 //	neosell backup -out FILE       consistent copy of the database
@@ -29,6 +31,9 @@ func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})))
 	args := os.Args[1:]
 	cmd := "serve"
+	if len(args) == 0 && isTTY() {
+		cmd = "menu" // a person typed `neosell`: show the management menu
+	}
 	if len(args) > 0 && args[0] != "" && args[0][0] != '-' {
 		cmd, args = args[0], args[1:]
 	}
@@ -38,6 +43,10 @@ func main() {
 		err = serve(args)
 	case "install":
 		err = install(args)
+	case "menu":
+		err = menu(args)
+	case "update":
+		err = update(args)
 	case "agent":
 		err = agentCmd(args)
 	case "admin":
@@ -65,7 +74,9 @@ func usage() {
 
 usage:
   neosell [serve] [-config path]
-  neosell install [-port 2087] [-public-url https://…] [-tls self|off|file]
+  neosell                       interactive menu (install, update, domain, port …)
+  neosell install [-domain d] [-email e] [-port N] [-tls acme|self|off|file] [-yes]
+  neosell update [-check]
   neosell agent join -panel URL -token TOKEN [-pin SHA256]   (on a tunnel server)
   neosell agent run
   neosell admin reset-password <email> <new-password>

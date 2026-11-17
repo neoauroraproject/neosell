@@ -134,7 +134,7 @@ const adminGroups = [
   ['/admin/services', 'مشتریان', [['/admin/services', 'سرویس‌ها', 'services.manage'], ['/admin/users', 'کاربران', 'users.view'], ['/admin/tickets', 'تیکت‌ها', 'tickets.manage'], ['/admin/broadcast', 'پیام همگانی', 'broadcast.send']]],
   ['/admin/products', 'فروش', [['/admin/products', 'محصولات', 'products.manage'], ['/admin/rules', 'قوانین قیمت', 'pricing.manage'], ['/admin/simulate', 'ماشین‌حساب', 'pricing.manage'], ['/admin/port-classes', 'کلاس پورت', 'pricing.manage'], ['/admin/groups', 'گروه‌ها', 'pricing.manage'], ['/admin/discounts', 'تخفیف', 'pricing.manage'], ['/admin/cards', 'کارت‌ها', 'settings.manage']]],
   ['/admin/nodes', 'سرورها', [['/admin/nodes', 'سرور تانل', 'nodes.manage'], ['/admin/tunnels', 'تانل اشتراکی', 'nodes.manage'], ['/admin/xui', 'پنل ثنایی', 'nodes.manage'], ['/admin/outbounds', 'اوتباندها', 'nodes.manage'], ['/admin/locations', 'لوکیشن‌ها', 'products.manage'], ['/admin/cores', 'هسته‌ها', 'nodes.manage']]],
-  ['/admin/settings', 'سیستم', [['/admin/settings', 'تنظیمات', 'settings.manage'], ['/admin/admins', 'ادمین‌ها', 'admins.manage'], ['/admin/roles', 'نقش‌ها', 'admins.manage'], ['/admin/audit', 'لاگ ممیزی', 'audit.view'], ['/admin/license', 'لایسنس', '']]],
+  ['/admin/settings', 'سیستم', [['/admin/settings', 'تنظیمات', 'settings.manage'], ['/admin/system', 'به‌روزرسانی', 'settings.manage'], ['/admin/admins', 'ادمین‌ها', 'admins.manage'], ['/admin/roles', 'نقش‌ها', 'admins.manage'], ['/admin/audit', 'لاگ ممیزی', 'audit.view'], ['/admin/license', 'لایسنس', '']]],
 ];
 
 function isOn(href) {

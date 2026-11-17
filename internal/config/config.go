@@ -12,6 +12,9 @@ import (
 
 const DefaultPath = "/etc/neosell/config.json"
 
+// DefaultUpdateRepo publishes release binaries and SHA256SUMS.
+const DefaultUpdateRepo = "neoauroraproject/neosell"
+
 type Config struct {
 	// Listen is the panel's HTTP(S) address, e.g. ":2087".
 	Listen string `json:"listen"`
@@ -19,10 +22,17 @@ type Config struct {
 	DataDir string `json:"data_dir"`
 	// PublicURL is how customers reach the panel (used in links, sub URLs, install scripts).
 	PublicURL string `json:"public_url"`
-	// TLS: "off" (behind a proxy), "self" (self-signed) or "file" (CertFile/KeyFile).
-	TLS      string `json:"tls"`
-	CertFile string `json:"cert_file,omitempty"`
-	KeyFile  string `json:"key_file,omitempty"`
+	// TLS: "acme" (Let's Encrypt for Domain), "self" (self-signed), "file"
+	// (CertFile/KeyFile) or "off" (behind a reverse proxy).
+	TLS string `json:"tls"`
+	// Domain the panel is reached at (required for tls=acme).
+	Domain string `json:"domain,omitempty"`
+	// ACMEEmail receives Let's Encrypt expiry notices (optional).
+	ACMEEmail string `json:"acme_email,omitempty"`
+	// UpdateRepo is the GitHub "owner/name" whose releases provide updates.
+	UpdateRepo string `json:"update_repo,omitempty"`
+	CertFile   string `json:"cert_file,omitempty"`
+	KeyFile    string `json:"key_file,omitempty"`
 	// OutboundProxy (socks5://host:port or http://host:port) is used for the
 	// license server and Telegram when the server has no direct international access.
 	OutboundProxy string `json:"outbound_proxy,omitempty"`
@@ -31,7 +41,7 @@ type Config struct {
 }
 
 func Default() Config {
-	return Config{Listen: ":2087", DataDir: "/var/lib/neosell", TLS: "self"}
+	return Config{Listen: ":2087", DataDir: "/var/lib/neosell", TLS: "self", UpdateRepo: DefaultUpdateRepo}
 }
 
 // Load reads path; a missing file yields the defaults.
@@ -52,6 +62,9 @@ func Load(path string) (Config, error) {
 	}
 	if c.DataDir == "" {
 		c.DataDir = Default().DataDir
+	}
+	if c.UpdateRepo == "" {
+		c.UpdateRepo = DefaultUpdateRepo
 	}
 	return c, nil
 }

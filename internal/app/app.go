@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/acme/autocert"
+
 	"neosell/internal/agentgw"
 	"neosell/internal/audit"
 	"neosell/internal/auth"
@@ -148,6 +150,28 @@ func (a *App) Serve(ctx context.Context) error {
 	}
 	switch a.Cfg.TLS {
 	case "off", "file":
+	case "acme":
+		if a.Cfg.Domain == "" {
+			return errors.New("tls=acme needs a domain (run: neosell menu → domain & SSL)")
+		}
+		m := &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(a.Cfg.Domain),
+			Cache:      autocert.DirCache(filepath.Join(a.Cfg.DataDir, "acme")),
+			Email:      a.Cfg.ACMEEmail,
+		}
+		hs.TLSConfig = m.TLSConfig()
+		hs.TLSConfig.MinVersion = tls.VersionTLS12
+		// Port 80 answers Let's Encrypt HTTP-01 challenges and redirects to the panel.
+		go func() {
+			redirect := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, a.publicURL()+r.URL.RequestURI(), http.StatusMovedPermanently)
+			})
+			h80 := &http.Server{Addr: ":80", Handler: m.HTTPHandler(redirect), ReadHeaderTimeout: 10 * time.Second}
+			if err := h80.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				slog.Warn("port 80 unavailable; Let's Encrypt falls back to TLS-ALPN (works only when the panel listens on 443)", "err", err)
+			}
+		}()
 	default:
 		cert, err := selfSigned(a.Cfg.DataDir)
 		if err != nil {
@@ -190,6 +214,8 @@ func (a *App) Serve(ctx context.Context) error {
 			err = hs.ListenAndServe()
 		case "file":
 			err = hs.ListenAndServeTLS(a.Cfg.CertFile, a.Cfg.KeyFile)
+		case "acme":
+			err = hs.ListenAndServeTLS("", "")
 		default:
 			err = hs.ListenAndServeTLS("", "")
 		}

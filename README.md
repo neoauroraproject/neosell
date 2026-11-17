@@ -2,103 +2,171 @@
 
 # Neo Sell
 
-پنل فروش **پورت تانل** (NeoTunnel، Kariz، Backpack) و **اوتباند** (پنل‌های ثنایی / 3x-ui) با کیف پول، قیمت‌گذاری کاملاً قابل تنظیم، ربات تلگرام و مصرف دقیق — همه در **یک فایل اجرایی** بدون هیچ وابستگی.
+فروشگاه کامل **پورت تانل** (NeoTunnel، Kariz، Backpack) و **اوتباند** (پنل ثنایی / 3x-ui) — با کیف پول، خرید مرحله‌به‌مرحله، ربات تلگرام و مصرف دقیق. همه در **یک فایل**، بدون نصب هیچ برنامه‌ی دیگری.
 
-- برنامه‌ی کامل طراحی: [docs/PLAN.md](docs/PLAN.md)
+<p align="center"><img src="docs/screenshots/01-landing.jpg" width="49%" alt="صفحه‌ی اصلی فروشگاه"> <img src="docs/screenshots/02-dashboard.jpg" width="49%" alt="داشبورد مشتری"></p>
 
-## نصب پنل
+## نصب با یک دستور
 
-روی یک سرور لینوکس (Ubuntu/Debian، amd64 یا arm64) با root:
-
-</div>
-
-```bash
-NEOSELL_URL=https://<آدرس-انتشار> bash <(curl -fsSL https://<آدرس-انتشار>/install.sh) --port 2087
-```
-
-<div dir="rtl">
-
-یا دستی: باینری `neosell-linux-<arch>` را در `/usr/local/bin/neosell` بگذارید و اجرا کنید:
+روی یک سرور لینوکس تازه (اوبونتو ۲۰.۰۴ به بالا یا دبیان ۱۱ به بالا) با کاربر **root** این دستور را بزنید:
 
 </div>
 
 ```bash
-sudo neosell install -port 2087 -public-url https://panel.example.com -tls self
+bash <(curl -fsSL https://raw.githubusercontent.com/neoauroraproject/neosell/main/scripts/install.sh)
 ```
 
 <div dir="rtl">
 
-| گزینه | معنی |
+نصب‌کننده سه سؤال ساده می‌پرسد:
+
+| سؤال | چه جوابی بدهم |
 |---|---|
-| `-tls self` | گواهی خودامضا (برای IP). Agentها با پین گواهی به آن اعتماد می‌کنند |
-| `-tls off` | پشت یک reverse proxy (مثلاً Caddy/Nginx با دامنه) |
-| `-tls file -cert … -key …` | گواهی خودتان |
-| `-proxy socks5://127.0.0.1:1080` | پراکسی خروجی برای سرور لایسنس، تلگرام و پنل‌های ثنایی (سرور ایران) |
+| **Domain for the panel** | دامنه‌ی پنل، مثلاً `shop.example.com`. خالی بگذارید تا با IP سرور بالا بیاید. |
+| **Email for SSL** | ایمیل برای اطلاع از تمدید گواهی (اختیاری؛ Enter بزنید). |
+| **Panel port** | یک پورت آزاد **تصادفی** پیشنهاد می‌شود؛ Enter بزنید تا همان بماند. بعداً هر وقت خواستید عوضش کنید. |
 
-بعد آدرس پنل را باز کنید: حساب **مالک** را بسازید و **کلید لایسنس** را وارد کنید.
+در پایان آدرس پنل نمایش داده می‌شود:
 
-## راه‌اندازی فروش (به ترتیب)
+</div>
 
-1. **تنظیمات** ← «آدرس عمومی پنل» (برای لینک ساب و اسکریپت‌های نصب)، نام فروشگاه، ثبت‌نام، مهلت‌ها.
-2. **سرورهای تانل** ← افزودن سرور ایران ← «دستور نصب Agent» را روی همان سرور اجرا کنید. برای NeoTunnel آدرس محلی پنل NeoTunnel و یک توکن API با دسترسی full را وارد کنید.
-3. **تانل‌های اشتراکی** (اگر پورت روی سرور خارج خودتان فروخته می‌شود): نام تانل موجود NeoTunnel (مثلاً `t1`)، یا برای Kariz/Backpack پورت اتصال + دستور نصب سمت خارج.
-4. **هسته‌های تانل**: برای Kariz و Backpack آدرس دانلود باینری و قالب کانفیگ سمت ایران و خارج را بنویسید.
-5. **پنل‌های ثنایی** ← افزودن پنل ← **اوتباندها** ← ثبت اینباندها برای هر لوکیشن.
-6. **کلاس‌های پورت** ← **محصولات** ← **قوانین قیمت** ← امتحان در **ماشین‌حساب قیمت**.
-7. **کارت‌های واریز** (شارژ کارت‌به‌کارت) و در تنظیمات، **ربات تلگرام** (توکن BotFather).
+```text
+  ✓ shop.example.com points to this server (203.0.113.10)
+  ✓ Neo Sell is running
+
+  Open:  https://shop.example.com:34127
+  The SSL certificate is issued on the first visit (takes a few seconds).
+  Then create the owner account and enter your license key.
+  Manage later with:  neosell
+```
+
+<div dir="rtl">
+
+آدرس را باز کنید ← **حساب مالک** را بسازید ← **کلید لایسنس** را وارد کنید. فروشگاه آماده است. ✅
+
+> **دامنه و SSL:** اگر دامنه دادید، گواهی رایگان Let's Encrypt **خودکار** گرفته و تمدید می‌شود. قبلش در DNS یک رکورد **A** برای دامنه به IP سرور بسازید، اگر از کلودفلر استفاده می‌کنید **ابر نارنجی را خاموش** کنید، و پورت **۸۰** سرور باز باشد.
+>
+> بدون دامنه، پنل با گواهی خودامضا روی IP بالا می‌آید؛ مرورگر یک بار هشدار می‌دهد، «ادامه» را بزنید.
+
+## منوی مدیریت
+
+هر وقت روی سرور فقط بنویسید `neosell` (یا همان دستور نصب را دوباره بزنید)، این منو باز می‌شود:
+
+</div>
+
+```text
+  ● Neo Sell  v0.2.0
+  panel: running  https://shop.example.com:34127
+
+   1  Reinstall / reconfigure panel
+   2  Update to the latest version
+   3  Set domain & SSL (Let's Encrypt)
+   4  Change panel port
+   5  Show panel address
+   6  Reset an admin password
+   7  Restart panel
+   8  Live logs (Ctrl+C to return)
+   9  Backup database
+  10  License status
+  11  Uninstall
+   0  Exit
+```
+
+<div dir="rtl">
+
+| گزینه | کار |
+|---|---|
+| **۲ به‌روزرسانی** | آخرین نسخه را دانلود، با چک‌سام بررسی و جایگزین می‌کند و پنل را دوباره راه می‌اندازد. |
+| **۳ دامنه و SSL** | دامنه بدهید یا عوض کنید؛ گواهی خودکار گرفته می‌شود. می‌توانید پنل را روی پورت ۴۴۳ ببرید تا آدرس بدون پورت باشد. |
+| **۴ تغییر پورت** | پورت دلخواه را وارد کنید (یا `r` برای تصادفی). |
+| **۶ رمز ادمین** | اگر رمز را فراموش کردید. |
+| **۹ پشتیبان** | یک نسخه‌ی کامل از دیتابیس می‌سازد (پنل لازم نیست خاموش شود). |
+| **۱۱ حذف** | سرویس‌ها را برمی‌دارد؛ می‌پرسد اطلاعات هم پاک شود یا بماند. |
+
+### به‌روزرسانی از داخل پنل
+
+پنل مدیریت ← **سیستم** ← **به‌روزرسانی**: نسخه‌ی فعلی و آخرین نسخه را می‌بینید و با یک کلیک به‌روز می‌کنید. فایل تازه با چک‌سام بررسی می‌شود و پنل چند ثانیه بعد با نسخه‌ی جدید برمی‌گردد. **سرویس‌های مشتری‌ها قطع نمی‌شوند.**
+
+## راه‌اندازی فروشگاه (به ترتیب)
+
+1. **سیستم ← تنظیمات:** نام فروشگاه، راه پشتیبانی، ثبت‌نام باز یا بسته، مهلت‌ها.
+2. **سرورها ← سرور تانل ← افزودن:** سرور ایران را اضافه کنید و دکمه‌ی **«دستور نصب Agent»** را بزنید؛ دستوری که می‌دهد را روی همان سرور اجرا کنید. برای NeoTunnel آدرس محلی پنل NeoTunnel و یک توکن API (دسترسی full) را وارد کنید.
+3. **سرورها ← تانل اشتراکی:** اگر پورت‌ها روی سرور خارج خودتان فروخته می‌شوند (برای NeoTunnel نام تانل، مثلاً `t1`).
+4. **سرورها ← پنل ثنایی ← اوتباندها:** پنل‌های 3x-ui را اضافه کنید و اینباندهای هر لوکیشن را ثبت کنید.
+5. **فروش ← کلاس پورت ← محصولات ← قوانین قیمت:** پورت‌های قابل فروش، محصول‌ها و قیمت‌ها. نتیجه را در **ماشین‌حساب** امتحان کنید.
+6. **فروش ← کارت‌ها:** شماره کارت برای شارژ کارت‌به‌کارت.
+7. **سیستم ← تنظیمات ← ربات تلگرام:** توکن BotFather را بگذارید و روشن کنید.
+
+## مشتری چه می‌بیند
+
+خرید در **چهار قدم** است (محصول، روش خرید، تنظیمات، پرداخت) و قیمت کنار صفحه لحظه‌به‌لحظه حساب می‌شود. اگر موجودی کم باشد، شارژ همان مبلغ در همان صفحه انجام می‌شود.
+
+<p align="center"><img src="docs/screenshots/03-shop-wizard.jpg" width="49%" alt="خرید مرحله‌به‌مرحله"> <img src="docs/screenshots/04-service.jpg" width="49%" alt="صفحه‌ی سرویس"></p>
+<p align="center"><img src="docs/screenshots/05-wallet.jpg" width="49%" alt="کیف پول"> <img src="docs/screenshots/06-topup.jpg" width="49%" alt="شارژ کارت‌به‌کارت"></p>
+<p align="center"><img src="docs/screenshots/07-admin.jpg" width="49%" alt="داشبورد مدیریت"> <img src="docs/screenshots/08-mobile.jpg" width="24%" alt="نمای موبایل"></p>
+
+## سؤال‌های رایج
+
+<details><summary><b>گواهی SSL گرفته نمی‌شود</b></summary>
+
+- رکورد A دامنه باید دقیقاً به IP همین سرور اشاره کند (نصب‌کننده بررسی می‌کند و هشدار می‌دهد).
+- پروکسی CDN (ابر نارنجی) را برای این رکورد خاموش کنید.
+- پورت ۸۰ باید باز و آزاد باشد (وب‌سرور دیگری روی آن نباشد).
+- لاگ: `neosell` ← گزینه‌ی ۸.
+</details>
+
+<details><summary><b>سرور ایران به اینترنت آزاد دسترسی ندارد</b></summary>
+
+برای لایسنس و تلگرام یک پراکسی خروجی بدهید:
+
+</div>
+
+```bash
+neosell install -proxy socks5://127.0.0.1:1080
+```
+
+<div dir="rtl">
+</details>
+
+<details><summary><b>نصب بدون سؤال (برای اسکریپت)</b></summary>
+
+</div>
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/neoauroraproject/neosell/main/scripts/install.sh) \
+  install -yes -domain shop.example.com -email you@example.com
+```
+
+<div dir="rtl">
+</details>
+
+<details><summary><b>انتقال به سرور دیگر</b></summary>
+
+در منو گزینه‌ی ۹ (پشتیبان) را بزنید و فایل پشتیبان به‌همراه `/var/lib/neosell/secret.key` را به سرور جدید ببرید. آنجا نصب کنید، سرویس را متوقف کنید (`systemctl stop neosell`)، فایل را جای `/var/lib/neosell/neosell.db` بگذارید و دوباره روشن کنید. لایسنس روی سرور جدید با «آزادسازی دستگاه» در پورتال لایسنس منتقل می‌شود.
+</details>
 
 ## دستورها
 
 </div>
 
 ```text
-neosell [serve] [-config /etc/neosell/config.json]
-neosell install ...                         نصب پنل + سرویس systemd
-neosell agent join -panel URL -token T      نصب Agent روی سرور تانل (معمولاً از راه agent.sh)
-neosell agent run
-neosell backup -out /root/neosell.db        پشتیبان سازگار از دیتابیس (secret.key را هم نگه دارید)
-neosell admin reset-password <email> <pass>
+neosell                                   منوی مدیریت
+neosell install [-domain d] [-email e] [-port N] [-tls acme|self|off|file] [-yes]
+neosell update [-check]                   به‌روزرسانی به آخرین نسخه (با بررسی چک‌سام)
+neosell agent join -panel URL -token T    نصب Agent روی سرور تانل (دستورش را پنل می‌دهد)
+neosell backup -out FILE                  پشتیبان از دیتابیس
+neosell admin reset-password EMAIL PASS
 neosell license status|recheck
 neosell version
 ```
 
 <div dir="rtl">
 
-## ساخت از سورس
+## برای توسعه‌دهنده
 
-نیازمندی فقط Go 1.24+ است (رابط وب بدون build و داخل باینری است):
-
-</div>
-
-```bash
-./scripts/build.sh        # vet + test + dist/neosell-linux-{amd64,arm64} + SHA256SUMS
-go test ./...
-```
-
-<div dir="rtl">
-
-## ساختار
-
-| مسیر | کار |
-|---|---|
-| `cmd/neosell` | نقطه‌ی ورود: پنل، Agent، نصب، پشتیبان |
-| `internal/license` | کلاینت سرور لایسنس (Ed25519، قفل دستگاه، ماژول‌ها و سقف‌ها) |
-| `internal/pricing` | موتور قیمت (خالص، تست‌شده) |
-| `internal/catalog` | محصولات، کلاس پورت، قوانین قیمت، تخفیف |
-| `internal/wallet`, `internal/payments` | دفتر کیف پول، شارژ کارت‌به‌کارت |
-| `internal/services` | سفارش، سرویس، تمدید، افزودنی، مصرف، چرخه‌ی عمر، ساب |
-| `internal/agent`, `internal/agentproto`, `internal/agentgw` | Neo Agent (nftables، درایور هسته‌ها) و اتصال آن به پنل |
-| `internal/xui` | کلاینت 3x-ui و ساخت لینک/اوتباند xray |
-| `internal/bot`, `internal/telegram`, `internal/notify` | ربات تلگرام و اعلان‌ها |
-| `internal/httpapi`, `internal/webui` | API و رابط وب (embed) |
-
-## سرور لایسنس
-
-مسیر `POST /v1/neosell/license` در `hm-license-manager` (برنچ `feat/neosell-license`). کلید خصوصی امضا باید به‌صورت secret روی Worker قرار بگیرد:
+- طراحی کامل: [docs/PLAN.md](docs/PLAN.md)
+- ساخت: `./scripts/build.sh` (vet + تست + باینری‌های `linux/amd64` و `linux/arm64` + `SHA256SUMS`). فقط Go 1.24+ لازم است؛ رابط وب بدون build داخل باینری است.
+- انتشار نسخه: `./scripts/release.sh v0.2.0 "تغییرات…"` — همان نسخه‌ای که نصب‌کننده، `neosell update` و صفحه‌ی به‌روزرسانی پنل از آن استفاده می‌کنند.
+- سرور لایسنس: مسیر `POST /v1/neosell/license` در `hm-license-manager`؛ کلید امضا با `wrangler secret put NEOSELL_LICENSE_PRIVATE_KEY`.
 
 </div>
-
-```bash
-npx wrangler secret put NEOSELL_LICENSE_PRIVATE_KEY
-npx wrangler d1 migrations apply hm-license-db --remote
-```
