@@ -39,7 +39,7 @@ fetch() {
   say "downloading neosell-linux-$ARCH …"
   curl -fSL --progress-bar "$BASE/neosell-linux-$ARCH" -o "$tmp/neosell" || die "download failed ($BASE). Is the repository public and does it have a release?"
   if curl -fsSL "$BASE/SHA256SUMS" -o "$tmp/SHA256SUMS" 2>/dev/null; then
-    ( cd "$tmp" && grep " neosell-linux-$ARCH\$" SHA256SUMS | sed "s/neosell-linux-$ARCH/neosell/" | sha256sum -c --quiet - ) || die "checksum mismatch — download refused"
+    ( cd "$tmp" && grep -E " +\*?neosell-linux-$ARCH\$" SHA256SUMS | sed -E "s/ +\*?neosell-linux-$ARCH\$/  neosell/" | sha256sum -c --quiet - ) || die "checksum mismatch — download refused"
     say "checksum verified"
   else
     say "${dim}no SHA256SUMS published; skipped verification${off}"

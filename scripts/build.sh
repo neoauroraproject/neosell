@@ -17,5 +17,5 @@ for arch in amd64 arm64; do
   CGO_ENABLED=0 GOOS=linux GOARCH=$arch go build -trimpath -ldflags "$LDFLAGS" -o "dist/neosell-linux-$arch" ./cmd/neosell
 done
 cp scripts/install.sh dist/install.sh
-(cd dist && sha256sum neosell-linux-amd64 neosell-linux-arm64 install.sh > SHA256SUMS)
+(cd dist && sha256sum neosell-linux-amd64 neosell-linux-arm64 install.sh | sed 's/ \*/  /' > SHA256SUMS)
 ls -lh dist
