@@ -208,7 +208,7 @@ neosell version
 ### 💖 Support Our Development
 
 <p>
-  Your support helps us maintain and improve our open-source projects.
+  Your support helps us maintain and improve our projects.
 </p>
 
 <p>
@@ -245,7 +245,7 @@ neosell version
 
 **Crafted with ❤️ by the NeoAurora Team**
 
-<sub>Open Source · Built with Passion</sub>
+<sub>Free to Use · All Rights Reserved · Built with Passion</sub>
 
 ---
 </div>
